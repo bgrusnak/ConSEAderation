@@ -35,25 +35,27 @@ jobs:
                 base="${fname%.md}"
                 outname="${langdir}-${base}.md"
                 cp "$f" "wiki/$outname"
-                # Переписываем ссылки вида (xx/abc.md) и (xx/abc) на xx-abc
+                # Все языковые (xx/abc.md, xx/abc) → xx-abc
                 for tgtlang in ??; do
                   sed -i -E "s#\((\s*)${tgtlang}/([^)]+?)(\.md)?(\s*)\)#(\1${tgtlang}-\2\4)#g" "wiki/$outname"
                 done
-                # Переписываем локальные ссылки (index.md, index, description.md, description и т.д.) на xx-имя
+                # Все локальные (index.md, description.md, index, description и т.д.) → lang-имя
                 sed -i -E "s#\((\s*)(index|description|home|about|main)(\.md)?(\s*)\)#(\1${langdir}-\2\4)#gI" "wiki/$outname"
               done
             fi
           done
 
-      - name: Copy root Markdown files to wiki (with link rewrite)
+      - name: Copy and rewrite root Markdown files to wiki
         run: |
           shopt -s nullglob
           for f in *.md; do
             cp "$f" "wiki/$f"
-            # Переписываем ссылки на языковые файлы (xx/abc.md, xx/abc) → xx-abc
+            # Все языковые (xx/abc.md, xx/abc) → xx-abc
             for tgtlang in ??; do
               sed -i -E "s#\((\s*)${tgtlang}/([^)]+?)(\.md)?(\s*)\)#(\1${tgtlang}-\2\4)#g" "wiki/$f"
             done
+            # Все локальные (index.md, description.md, index, description и т.д.) → ru-index / en-index и т.д. (нет префикса для root — поэтому только языковые, а для Home, ссылки с языковым префиксом)
+            # Если нужно — добавить собственные правила
           done
 
       - name: Copy images folder to wiki
