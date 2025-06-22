@@ -1,4 +1,4 @@
-name: Sync languages, images and root files to Wiki (with link/image rewrite)
+name: Sync flattened multilingual docs to Wiki
 
 on:
   push:
@@ -25,18 +25,19 @@ jobs:
           cd wiki
           rm -rf -- !(.git)
 
-      - name: Rewrite links for wiki
+      - name: Flatten and copy language files to wiki
         run: |
-          for file in $(find . -name '*.md'); do
-            sed -i -E 's/\(([^)]+)\.md\)/(\1)/g' "$file"
-          done
-
-      - name: Copy language folders to wiki
-        run: |
+          shopt -s nullglob
           for langdir in ??; do
             if [ -d "$langdir" ]; then
-              mkdir -p "wiki/$langdir"
-              rsync -av --exclude .git --exclude wiki --exclude .github "./$langdir/" "./wiki/$langdir/"
+              for f in "$langdir"/*.md; do
+                fname=$(basename "${f}")
+                base="${fname%.md}"
+                # Копируем с новым именем
+                cp "$f" "wiki/${langdir}-${base}.md"
+                # Переписываем ссылки внутри файла: xx/abc.md → xx-abc
+                sed -i -E "s#\(\s*${langdir}/([^)]+)\.md\s*\)#(${langdir}-\1)#g" "wiki/${langdir}-${base}.md"
+              done
             fi
           done
 
@@ -47,26 +48,12 @@ jobs:
             cp "$f" "wiki/$f"
           done
 
-      - name: Copy images to wiki
-        run: |
-          if [ -d images ]; then
-            rsync -av images/ wiki/images/
-          fi
-
-      - name: Fix image links in subfolders
-        run: |
-          for langdir in ??; do
-            if [ -d "$langdir" ]; then
-              find "$langdir" -type f -name '*.md' -exec sed -i 's|src="images/|src="../images/|g' {} +
-            fi
-          done
-
       - name: Commit & Push to Wiki
         run: |
           cd wiki
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add .
-          git commit -m "Sync language folders, images and root files to wiki [auto]" || echo "No changes to commit"
+          git commit -m "Sync flattened multilingual docs to wiki [auto]" || echo "No changes to commit"
           git push
 
