@@ -36,11 +36,11 @@ jobs:
                 outname="${langdir}-${base}.md"
                 cp "$f" "wiki/$outname"
 
-                # 1. Все ссылки на файлы с любым путем типа (../en/index.md) (./en/index.md) (/en/index.md) (en/index.md) → (en-index)
-                sed -i -E "s#\((\.{0,2}/)?${langdir}/([^)]+?)\.md\)#(${langdir}-\2)#g" "wiki/$outname"
+                # 1. Любые ссылки на файлы с языковым префиксом (en/index.md), (en/index), (./en/index.md), (../en/index), etc. => (en-index)
+                sed -i -E "s#\((\.{0,2}/)?${langdir}/([a-zA-Z0-9_-]+)(\.md)?\)#(${langdir}-\2)#g" "wiki/$outname"
 
-                # 2. Все ссылки на локальные файлы (index.md, description.md и т.п. без пути) → (langdir-index), (langdir-description)
-                sed -i -E "s#\((\.{0,2}/)?([a-zA-Z0-9_-]+)\.md\)#(${langdir}-\2)#g" "wiki/$outname"
+                # 2. Любые ссылки на локальные файлы (index.md), (index), (./index.md), (../index), etc. => (ru-index)
+                sed -i -E "s#\((\.{0,2}/)?([a-zA-Z0-9_-]+)(\.md)?\)#(${langdir}-\2)#g" "wiki/$outname"
               done
             fi
           done
@@ -50,9 +50,9 @@ jobs:
           shopt -s nullglob
           for f in *.md; do
             cp "$f" "wiki/$f"
-            # Все языковые ссылки в корневых md: (../en/index.md), (en/index.md) и т.п.
+            # Ссылки на языковые файлы: (en/index.md), (en/index), (./en/index.md), etc. => (en-index)
             for tgtlang in ??; do
-              sed -i -E "s#\((\.{0,2}/)?${tgtlang}/([^)]+?)\.md\)#(${tgtlang}-\2)#g" "wiki/$f"
+              sed -i -E "s#\((\.{0,2}/)?${tgtlang}/([a-zA-Z0-9_-]+)(\.md)?\)#(${tgtlang}-\2)#g" "wiki/$f"
             done
           done
 
