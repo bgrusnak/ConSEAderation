@@ -36,10 +36,10 @@ jobs:
                 outname="${langdir}-${base}.md"
                 cp "$f" "wiki/$outname"
 
-                # Переписать ссылки вида ../<lang>/<file>.md, ./<lang>/<file>.md, <lang>/<file>.md на <lang>-<file>
-                sed -i -E "s#\((\.{1,2}/)?(${langdir})/([^)]+?)\.md\)#(${langdir}-\3)#g" "wiki/$outname"
+                # 1. Все ссылки на файлы с любым путем типа (../en/index.md) (./en/index.md) (/en/index.md) (en/index.md) → (en-index)
+                sed -i -E "s#\((\.{0,2}/)?${langdir}/([^)]+?)\.md\)#(${langdir}-\2)#g" "wiki/$outname"
 
-                # Переписать ссылки на файлы СВОЕГО языка без пути: description.md, ./description.md, ../description.md
+                # 2. Все ссылки на локальные файлы (index.md, description.md и т.п. без пути) → (langdir-index), (langdir-description)
                 sed -i -E "s#\((\.{0,2}/)?([a-zA-Z0-9_-]+)\.md\)#(${langdir}-\2)#g" "wiki/$outname"
               done
             fi
@@ -50,9 +50,9 @@ jobs:
           shopt -s nullglob
           for f in *.md; do
             cp "$f" "wiki/$f"
-            # Для корневых файлов: переписать все <lang>/<file>.md и ./<lang>/<file>.md и ../<lang>/<file>.md на <lang>-<file>
+            # Все языковые ссылки в корневых md: (../en/index.md), (en/index.md) и т.п.
             for tgtlang in ??; do
-              sed -i -E "s#\((\.{1,2}/)?${tgtlang}/([^)]+?)\.md\)#(${tgtlang}-\2)#g" "wiki/$f"
+              sed -i -E "s#\((\.{0,2}/)?${tgtlang}/([^)]+?)\.md\)#(${tgtlang}-\2)#g" "wiki/$f"
             done
           done
 
