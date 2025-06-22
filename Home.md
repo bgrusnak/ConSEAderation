@@ -6,6 +6,13 @@
 
 **Autonomous Ocean Platform** is a comprehensive engineering and biotechnological project for building a fully self-sustaining floating colony for 15 people, designed for decades of independent operation in the open sea.
 
+## Documentation
+
+**🌐 [English Documentation](en/index.md)**  
+**🌐 [Русская документация](ru/index.md)**
+
+---
+
 ## Key Features
 
 - **Resilient Construction:**  
@@ -31,12 +38,10 @@
   <img src="images/plan.png" alt="Platform Top View" width="480"/>
 </p>
 
-
 ## Mission
 
 Demonstrate that modern, comfortable, and truly sustainable life is possible at sea — without dependence on external supplies, with minimal environmental impact, and using only technologies reproducible from locally available resources.
 
 ---
 
-**For technical documentation and in-depth design details, see `description.md` and the specialized modules in this repository.**
-
+**For complete technical documentation and in-depth design details, follow the language-specific documentation links above.**
