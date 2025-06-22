@@ -35,12 +35,16 @@ jobs:
                 base="${fname%.md}"
                 outname="${langdir}-${base}.md"
                 cp "$f" "wiki/$outname"
-                # Все языковые (xx/abc.md, xx/abc) → xx-abc
+                # Переписываем ссылки вида (xx/abc.md), (xx/abc) → (xx-abc)
                 for tgtlang in ??; do
-                  sed -i -E "s#\((\s*)${tgtlang}/([^)]+?)(\.md)?(\s*)\)#(\1${tgtlang}-\2\4)#g" "wiki/$outname"
+                  # сначала все xx/abc.md → xx-abc
+                  sed -i -E "s#\((\s*)${tgtlang}/([^)]+?)\.md(\s*)\)#(\1${tgtlang}-\2\3)#g" "wiki/$outname"
+                  # потом все xx/abc → xx-abc
+                  sed -i -E "s#\((\s*)${tgtlang}/([^)]+?)(\s*)\)#(\1${tgtlang}-\2\3)#g" "wiki/$outname"
                 done
-                # Все локальные (index.md, description.md, index, description и т.д.) → lang-имя
-                sed -i -E "s#\((\s*)(index|description|home|about|main)(\.md)?(\s*)\)#(\1${langdir}-\2\4)#gI" "wiki/$outname"
+                # Локальные: (index.md), (index), (description.md), (description) → (lang-index), (lang-description)
+                sed -i -E "s#\((\s*)(index|description|home|about|main)\.md(\s*)\)#(\1${langdir}-\2\3)#gI" "wiki/$outname"
+                sed -i -E "s#\((\s*)(index|description|home|about|main)(\s*)\)#(\1${langdir}-\2\3)#gI" "wiki/$outname"
               done
             fi
           done
@@ -50,12 +54,11 @@ jobs:
           shopt -s nullglob
           for f in *.md; do
             cp "$f" "wiki/$f"
-            # Все языковые (xx/abc.md, xx/abc) → xx-abc
+            # Все xx/abc.md → xx-abc
             for tgtlang in ??; do
-              sed -i -E "s#\((\s*)${tgtlang}/([^)]+?)(\.md)?(\s*)\)#(\1${tgtlang}-\2\4)#g" "wiki/$f"
+              sed -i -E "s#\((\s*)${tgtlang}/([^)]+?)\.md(\s*)\)#(\1${tgtlang}-\2\3)#g" "wiki/$f"
+              sed -i -E "s#\((\s*)${tgtlang}/([^)]+?)(\s*)\)#(\1${tgtlang}-\2\3)#g" "wiki/$f"
             done
-            # Все локальные (index.md, description.md, index, description и т.д.) → ru-index / en-index и т.д. (нет префикса для root — поэтому только языковые, а для Home, ссылки с языковым префиксом)
-            # Если нужно — добавить собственные правила
           done
 
       - name: Copy images folder to wiki
