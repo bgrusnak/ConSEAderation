@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="logo.png" alt="Autonomous Ocean Platform Logo" width="160"/>
+  <img src="images/logo.png" alt="Autonomous Ocean Platform Logo" width="400"/>
 </p>
 
 # Autonomous Ocean Platform
@@ -28,7 +28,7 @@
 ## Sample of the design
 
 <p align="center">
-  <img src="plan.png" alt="Platform Top View" width="480"/>
+  <img src="images/plan.png" alt="Platform Top View" width="480"/>
 </p>
 
 

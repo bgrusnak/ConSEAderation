@@ -1,0 +1,41 @@
+name: Sync to Wiki
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Клонируем основной репозиторий
+      - name: Checkout main repo
+        uses: actions/checkout@v4
+
+      # 2. Клонируем wiki-репозиторий в отдельную папку
+      - name: Clone wiki repo
+        run: |
+          git clone https://github.com/${{ github.repository }}.wiki.git wiki
+
+      # 3. Удаляем все старое содержимое Wiki (кроме .git)
+      - name: Clean wiki repo
+        run: |
+          shopt -s extglob
+          cd wiki
+          rm -rf -- !(.git)
+
+      # 4. Копируем всё содержимое (кроме .git, .github, wiki самой) в Wiki
+      - name: Copy files to wiki
+        run: |
+          rsync -av --exclude .git --exclude wiki --exclude .github ./ ./wiki/
+
+      # 5. Делаем коммит и пушим в Wiki
+      - name: Commit & Push to Wiki
+        run: |
+          cd wiki
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -m "Sync main repo to wiki [auto]" || echo "No changes to commit"
+          git push
