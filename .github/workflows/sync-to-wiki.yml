@@ -1,4 +1,4 @@
-name: Sync flattened multilingual docs to Wiki
+name: Sync flattened multilingual docs & images to Wiki
 
 on:
   push:
@@ -25,7 +25,7 @@ jobs:
           cd wiki
           rm -rf -- !(.git)
 
-      - name: Flatten and copy language files to wiki
+      - name: Flatten and copy language markdown files to wiki (with link rewrite)
         run: |
           shopt -s nullglob
           for langdir in ??; do
@@ -33,20 +33,33 @@ jobs:
               for f in "$langdir"/*.md; do
                 fname=$(basename "${f}")
                 base="${fname%.md}"
-                # Копируем с новым именем
-                cp "$f" "wiki/${langdir}-${base}.md"
-                # Переписываем ссылки внутри файла: xx/abc.md → xx-abc
-                sed -i -E "s#\(\s*${langdir}/([^)]+)\.md\s*\)#(${langdir}-\1)#g" "wiki/${langdir}-${base}.md"
+                outname="${langdir}-${base}.md"
+                cp "$f" "wiki/$outname"
+                # Переписываем ВСЕ ссылки вида (.../abc.md) и (.../abc) на плоские: lang-abc
+                sed -i -E "s#\((\s*)${langdir}/([^)]+?)(\.md)?(\s*)\)#(\1${langdir}-\2\4)#g" "wiki/$outname"
+                # Переписываем ссылки на статьи без языка (например, (description.md) или (description)) — тоже с языковым префиксом
+                sed -i -E "s#\((\s*)description(\.md)?(\s*)\)#(\1${langdir}-description\3)#g" "wiki/$outname"
+                sed -i -E "s#\((\s*)index(\.md)?(\s*)\)#(\1${langdir}-index\3)#g" "wiki/$outname"
               done
             fi
           done
 
-      - name: Copy root Markdown files to wiki
+      - name: Copy root Markdown files to wiki (with link rewrite)
         run: |
           shopt -s nullglob
           for f in *.md; do
             cp "$f" "wiki/$f"
+            # Переписываем ссылки на языковые файлы вида (xx/abc.md) или (xx/abc)
+            for langdir in ??; do
+              sed -i -E "s#\((\s*)${langdir}/([^)]+?)(\.md)?(\s*)\)#(\1${langdir}-\2\4)#g" "wiki/$f"
+            done
           done
+
+      - name: Copy images folder to wiki
+        run: |
+          if [ -d images ]; then
+            rsync -a images/ wiki/images/
+          fi
 
       - name: Commit & Push to Wiki
         run: |
@@ -54,6 +67,6 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add .
-          git commit -m "Sync flattened multilingual docs to wiki [auto]" || echo "No changes to commit"
+          git commit -m "Sync flattened multilingual docs & images to wiki [auto]" || echo "No changes to commit"
           git push
 
