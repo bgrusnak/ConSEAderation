@@ -1,4 +1,4 @@
-name: Sync to Wiki
+name: Sync languages to Wiki
 
 on:
   push:
@@ -25,9 +25,14 @@ jobs:
           cd wiki
           rm -rf -- !(.git)
 
-      - name: Copy files to wiki
+      - name: Copy language folders to wiki
         run: |
-          rsync -av --exclude .git --exclude wiki --exclude .github ./ ./wiki/
+          for langdir in ??; do
+            if [ -d "$langdir" ]; then
+              mkdir -p "wiki/$langdir"
+              rsync -av --exclude .git --exclude wiki --exclude .github "./$langdir/" "./wiki/$langdir/"
+            fi
+          done
 
       - name: Commit & Push to Wiki
         run: |
@@ -35,6 +40,6 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add .
-          git commit -m "Sync main repo to wiki [auto]" || echo "No changes to commit"
+          git commit -m "Sync language folders to wiki [auto]" || echo "No changes to commit"
           git push
 
